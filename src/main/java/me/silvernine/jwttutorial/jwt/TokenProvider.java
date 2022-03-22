@@ -1,10 +1,9 @@
 package me.silvernine.jwttutorial.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +20,7 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Component
 public class TokenProvider implements InitializingBean {
     private static final String AUTHORITIES_KEY = "auth";
@@ -34,14 +34,12 @@ public class TokenProvider implements InitializingBean {
         this.secret = secret;
         this.tokenValidityInMilliSeconds = tokenValidityInSeconds * 1000;
     }
-
 //    빈 생성 후 의존성 주입 설정 후에 주입받은 secret 값을 Base64로 Decode한 후 key 변수에 할당
     @Override
     public void afterPropertiesSet() throws Exception {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
-
 //    jwt token 생성 후 리턴
     public String createToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().stream()
@@ -58,8 +56,7 @@ public class TokenProvider implements InitializingBean {
                 .setExpiration(validity)
                 .compact();
     }
-
-//  토큰에 담겨있는 정보를 이용해 Authentication 객체를 리턴하는 메소드 생성
+//    토큰에 담겨있는 정보를 이용해 Authentication 객체를 리턴하는 메소드 생성
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts
                 .parserBuilder()
@@ -77,4 +74,21 @@ public class TokenProvider implements InitializingBean {
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
+//    토큰을 검증하는 메서드
+    public boolean validateToken(String token) {
+        try{
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch(io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.info("잘못된 JWT 서명입니다.");
+        } catch(ExpiredJwtException e) {
+            log.info("만료된 JWT 토큰입니다.");
+        }catch(UnsupportedJwtException e) {
+            log.info("지원되지 않는 JWT 토큰입니다.");
+        }catch(IllegalArgumentException e) {
+            log.info("JWT 토큰이 잘못됐습니다.");
+        }
+        return false;
+    }
+
 }
