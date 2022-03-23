@@ -27,8 +27,8 @@ import java.util.List;
 public class JwtTokenProvider {
     private String secretKey = "c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK";
 //    private long tokenValidTime = 30 * 60 * 1000L; // 토큰 유효 시간 | 30분
-    private long accessTokenValidTime = 20 * 1000;
-    private long refreshTokenValidTime = 1 * 60 * 1000;
+    private long accessTokenValidTime = 10 * 20 * 1000;
+    private long refreshTokenValidTime = 30 * 60 * 1000;
 
 
     private final CustomUserDetailService customUserDetailService;
