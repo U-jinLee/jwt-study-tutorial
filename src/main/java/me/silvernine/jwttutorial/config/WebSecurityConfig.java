@@ -35,7 +35,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/h2-console/**");
+        web
+                .ignoring()
+                .antMatchers(
+                        "/h2-console/**",
+                        "/favicon.ico"
+                );
     }
 
     @Override
@@ -44,12 +49,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable() //csrf 비활성화
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
+                //ServletRequest를 사용하는 요청에 대한 접근 제한 설정
                 .authorizeRequests()
                 .antMatchers("/join", "/login").permitAll() //검증 없이 이용가능(Post 요청 가능)
                 .antMatchers("/admin/**").hasRole("ADMIN") // admin 권한만 접근 가능
                 .antMatchers("/user/**").hasRole("USER") // user 권한만 접근 가능
                 .anyRequest().authenticated()
                 .and()
+                //UsernamePasswordAuthenticationFilter 뒤에 저장 생성자 주입 받은 JwtTokenProvider를 넣어준다.
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
     }
 }
