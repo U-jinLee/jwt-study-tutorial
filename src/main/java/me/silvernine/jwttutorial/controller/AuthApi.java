@@ -3,8 +3,11 @@ package me.silvernine.jwttutorial.controller;
 import lombok.RequiredArgsConstructor;
 import me.silvernine.jwttutorial.dto.LoginRequestDto;
 import me.silvernine.jwttutorial.dto.TokenResponseDto;
+import me.silvernine.jwttutorial.dto.UserDto;
+import me.silvernine.jwttutorial.entity.user.User;
 import me.silvernine.jwttutorial.jwt.JwtFilter;
 import me.silvernine.jwttutorial.jwt.JwtTokenProvider;
+import me.silvernine.jwttutorial.service.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
-@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@RestController
 public class AuthApi {
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserService userService;
     private final AuthenticationManagerBuilder authenticationManager;
+
     @PostMapping("/authenticate")
     public ResponseEntity<TokenResponseDto> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
         //1. AuthenticationManager를 통해 인증을 시도하고 인증이 성공하면 Authentication 객체를 리턴받는다.
@@ -42,5 +47,10 @@ public class AuthApi {
         httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + jwtToken);
 
         return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(new TokenResponseDto(jwtToken));
+    }
+
+    @PostMapping("/sign-up")
+    public ResponseEntity<User> signUp(@Valid @RequestBody UserDto userDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.join(userDto));
     }
 }

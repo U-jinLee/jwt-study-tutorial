@@ -1,6 +1,8 @@
 package me.silvernine.jwttutorial.service;
 
 import lombok.RequiredArgsConstructor;
+import me.silvernine.jwttutorial.dto.UserDto;
+import me.silvernine.jwttutorial.entity.user.Authority;
 import me.silvernine.jwttutorial.entity.user.User;
 import me.silvernine.jwttutorial.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,8 +10,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-
+    private final PasswordEncoder passwordEncoder;
     /**
      * 로그인 시에 DB에서 유저정보와 권한정보를 가져와 UserDetails 타입으로 리턴한다.
      * @param username the username identifying the user whose data is required.
@@ -25,6 +30,7 @@ public class UserService implements UserDetailsService {
      * @throws UsernameNotFoundException
      */
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)
                 .map(user -> createUser(username, user))
@@ -39,25 +45,25 @@ public class UserService implements UserDetailsService {
                 .collect(Collectors.toList());
 
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
-    };
+    }
 
-//    public Long join(UserDto userDto) {
-//        long userId = userRepository.save(
-//                User.builder()
-//                        .email(userDto.getEmail())
-//                        .password(passwordEncoder.encode(userDto.getPassword()))
-//                        .roles(Collections.singletonList("ROLE_USER"))
-//                        .build())
-//                .getId();
-//
-//        return userId;
-//    }
-//    public User findUserByEmail(UserDto userDto) {
-//        User user = userRepository.findByEmail(userDto.getEmail())
-//                .orElseThrow(() -> new IllegalArgumentException("아이디 혹은 비밀번호가 잘못됐습니다."));
-//        return user;
-//    }
-//    public boolean checkPassword(User user, UserDto userDto) {
-//        return passwordEncoder.matches(userDto.getPassword(), user.getPassword());
-//    }
+    @Transactional
+    public User join(UserDto userDto) {
+        this.userRepository.findByUsername(userDto.getUserName()).ifPresent(user ->
+                new RuntimeException(user.getUserId() + "는 이미 존재하는 아이디입니다."));
+
+        Authority authority = Authority.builder()
+                .name("ROLE_USER")
+                .build();
+
+        User user = User.builder()
+                .username(userDto.getUserName())
+                .password(this.passwordEncoder.encode(userDto.getPassword()))
+                .nickname(userDto.getNickName())
+                .activated(true)
+                .authorities(Collections.singleton(authority))
+                .build();
+
+        return this.userRepository.save(user);
+    }
 }

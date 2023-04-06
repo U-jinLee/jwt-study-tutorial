@@ -1,30 +1,27 @@
-//package me.silvernine.jwttutorial.controller;
-//
-//import lombok.RequiredArgsConstructor;
-//import lombok.extern.slf4j.Slf4j;
-//import me.silvernine.jwttutorial.dto.UserDto;
-//import me.silvernine.jwttutorial.entity.user.RefreshToken;
-//import me.silvernine.jwttutorial.entity.user.TokenRepository;
-//import me.silvernine.jwttutorial.entity.user.User;
-//import me.silvernine.jwttutorial.jwt.JwtTokenProvider;
-//import me.silvernine.jwttutorial.service.UserService;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.PostMapping;
-//import org.springframework.web.bind.annotation.RequestBody;
-//import org.springframework.web.bind.annotation.RestController;
-//
-//import javax.servlet.http.HttpServletResponse;
-//
-//@Slf4j
-//@RequiredArgsConstructor
-//@RestController
-//public class UserController {
-//
-//    private final UserService userService;
-//    private final JwtTokenProvider jwtTokenProvider;
-//    private final TokenRepository tokenRepository;
-//
+package me.silvernine.jwttutorial.controller;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import me.silvernine.jwttutorial.dto.UserDto;
+import me.silvernine.jwttutorial.entity.user.User;
+import me.silvernine.jwttutorial.service.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+
+@Slf4j
+@RequiredArgsConstructor
+@RequestMapping("/api/users")
+@RestController
+public class UserController {
+
+    private final UserService userService;
+
 //    @PostMapping("/join")
 //    public ResponseEntity join(@RequestBody UserDto userDto) {
 //        Long result = userService.join(userDto);
@@ -58,5 +55,5 @@
 //    public String test() {
 //        return "Hello, User?";
 //    }
-//
-//}
+
+}
