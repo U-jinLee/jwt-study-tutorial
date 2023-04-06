@@ -1,30 +1,30 @@
 package me.silvernine.jwttutorial.config;
 
 import lombok.RequiredArgsConstructor;
-import me.silvernine.jwttutorial.jwt.JwtAuthenticationFilter;
+import me.silvernine.jwttutorial.jwt.JwtSecurityConfig;
 import me.silvernine.jwttutorial.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @RequiredArgsConstructor
-@Configuration
 @EnableWebSecurity
+@Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입 시 비밀번호 암호화 진행
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -46,17 +46,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable() //csrf 비활성화
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .csrf().disable() // csrf 비활성화
+                //Exception 처리를 위한 부분
+//                .exceptionHandling()
+//                .authenticationEntryPoint()
+//                .accessDeniedHandler()
+//                .and()
+                //세션 사용하지 않음
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
                 .and()
-                //ServletRequest를 사용하는 요청에 대한 접근 제한 설정
-                .authorizeRequests()
-                .antMatchers("/join", "/login").permitAll() //검증 없이 이용가능(Post 요청 가능)
+                .authorizeRequests() //ServletRequest를 사용하는 요청에 대한 접근 제한 설정
+                .antMatchers(HttpMethod.POST, "/api/auth/**").permitAll() //검증 없이 이용가능(Post 요청 가능)
                 .antMatchers("/admin/**").hasRole("ADMIN") // admin 권한만 접근 가능
                 .antMatchers("/user/**").hasRole("USER") // user 권한만 접근 가능
                 .anyRequest().authenticated()
+                //JwtSecurityConfig 적용
                 .and()
-                //UsernamePasswordAuthenticationFilter 뒤에 저장 생성자 주입 받은 JwtTokenProvider를 넣어준다.
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .apply(new JwtSecurityConfig(jwtTokenProvider));
+
     }
 }

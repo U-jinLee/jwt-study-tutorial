@@ -12,7 +12,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Entity @Table(name = "`user`")
 public class User {
     @Id
     @Column(name = "user_id")

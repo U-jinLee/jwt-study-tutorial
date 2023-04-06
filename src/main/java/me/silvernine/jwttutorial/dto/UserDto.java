@@ -1,9 +1,19 @@
 package me.silvernine.jwttutorial.dto;
 
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Getter
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 public class UserDto {
-    private String email;
+    @NotNull
+    @Size(min = 3, max = 50)
+    private String userName;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @NotNull
+    @Size(min = 3, max = 50)
     private String password;
+    @NotNull
+    @Size(min = 3, max = 50)
+    private String nickName;
 }
