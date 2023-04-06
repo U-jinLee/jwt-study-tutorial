@@ -5,6 +5,7 @@ import me.silvernine.jwttutorial.dto.UserDto;
 import me.silvernine.jwttutorial.entity.user.Authority;
 import me.silvernine.jwttutorial.entity.user.User;
 import me.silvernine.jwttutorial.repository.UserRepository;
+import me.silvernine.jwttutorial.util.SecurityUtil;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -38,7 +41,7 @@ public class UserService implements UserDetailsService {
     }
 
     private org.springframework.security.core.userdetails.User createUser(String username, User user) {
-        if(user.isActivated()) throw new RuntimeException(username + " -> 활성화되지 않은 사용자입니다.");
+        if(Objects.equals(user.isActivated(), false)) throw new RuntimeException(username + " -> 활성화되지 않은 사용자입니다.");
 
         List<GrantedAuthority> authorities = user.getAuthorities().stream().map(auth ->
                         new SimpleGrantedAuthority(auth.getName()))
@@ -65,5 +68,15 @@ public class UserService implements UserDetailsService {
                 .build();
 
         return this.userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<User> getUserWithAuthorities(String userName) {
+        return this.userRepository.findByUsername(userName);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<User> getUserWithAuthorities() {
+        return SecurityUtil.getCurrentUsername().flatMap(userRepository::findByUsername);
     }
 }

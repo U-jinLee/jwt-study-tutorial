@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 @EnableWebSecurity
 @Configuration
@@ -59,8 +61,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests() //ServletRequest를 사용하는 요청에 대한 접근 제한 설정
                 .antMatchers(HttpMethod.POST, "/api/auth/**").permitAll() //검증 없이 이용가능(Post 요청 가능)
-                .antMatchers("/admin/**").hasRole("ADMIN") // admin 권한만 접근 가능
-                .antMatchers("/user/**").hasRole("USER") // user 권한만 접근 가능
                 .anyRequest().authenticated()
                 //JwtSecurityConfig 적용
                 .and()

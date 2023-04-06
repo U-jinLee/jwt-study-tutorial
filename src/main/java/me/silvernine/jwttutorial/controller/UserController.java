@@ -2,17 +2,15 @@ package me.silvernine.jwttutorial.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.silvernine.jwttutorial.dto.UserDto;
 import me.silvernine.jwttutorial.entity.user.User;
 import me.silvernine.jwttutorial.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.Valid;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,6 +19,18 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+
+    @GetMapping("/{userName}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<User> getUserInfo(@PathVariable String userName) {
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.getUserWithAuthorities(userName).get());
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<User> getUserInfo() {
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.getUserWithAuthorities().get());
+    }
 
 //    @PostMapping("/join")
 //    public ResponseEntity join(@RequestBody UserDto userDto) {
