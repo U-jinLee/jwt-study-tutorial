@@ -23,7 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtTokenProvider jwtTokenProvider;
 
-    // 회원가입 시 비밀번호 암호화 진행
+    // 회원가입 시 비밀번호 암호화를 위한 PasswordEncoder 빈 등록
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -39,10 +39,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         web
                 .ignoring()
-                .antMatchers(
-                        "/h2-console/**",
-                        "/favicon.ico"
-                );
+                .antMatchers("/h2-console/**", "/favicon.ico");
     }
 
     @Override
