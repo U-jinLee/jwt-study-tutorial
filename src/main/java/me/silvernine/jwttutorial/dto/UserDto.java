@@ -14,10 +14,12 @@ public class UserDto {
     @NotNull
     @Size(min = 3, max = 50)
     private String userName;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
+//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotNull
     @Size(min = 3, max = 50)
     private String password;
+
     @NotNull
     @Size(min = 3, max = 50)
     private String nickName;
