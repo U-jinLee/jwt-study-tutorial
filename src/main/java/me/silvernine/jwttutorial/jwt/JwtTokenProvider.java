@@ -42,7 +42,11 @@ public class JwtTokenProvider implements InitializingBean {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    //jwt 토큰 생성
+    /**
+     * Authentication 객체의 권한 정보를 이용해 토큰 생성
+     * @param authentication - Authentication 객체
+     * @return - 토큰
+     */
     public String createToken(Authentication authentication) {
         //권한 값을 받아 하나의 문자열로 합침
         String authorities = authentication.getAuthorities().stream()
@@ -53,7 +57,7 @@ public class JwtTokenProvider implements InitializingBean {
         Date validity = new Date(now + this.tokenValidityInMilliseconds);
 
         return Jwts.builder()
-                .setSubject(authentication.getName())//페이로드 주제 정보
+                .setSubject(authentication.getName()) // 페이로드 주제 정보
                 .claim(AUTHORITIES_KEY, authorities)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .setExpiration(validity)
