@@ -35,6 +35,7 @@ public class AuthApi {
         //1. AuthenticationManager를 통해 인증을 시도하고 인증이 성공하면 Authentication 객체를 리턴받는다.
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword());
+        // 토큰의 인증 작업 수행, 해당 부분에 왔을 때 UserDetailsServiceImpl의 loadUserByUsername() 메소드가 실행된다.
         Authentication authentication = authenticationManager.getObject().authenticate(authenticationToken);
 
         //2. SecurityContextHolder에 위에서 생성한 Authentication 객체를 저장한다.
