@@ -5,6 +5,7 @@
 - Spring Boot 2.6.4
 - Spring Web, Spring Security, Spring Data JPA, Lombok, JWT
 - H2 Database
+- redis
 ## JWT Token 인증 관련 문서
 - [[JWT] Json Web Token 인증](https://yuma1029.tistory.com/12)
 - [[JWT] JWT 회원가입 구현하기](https://yuma1029.tistory.com/13)
