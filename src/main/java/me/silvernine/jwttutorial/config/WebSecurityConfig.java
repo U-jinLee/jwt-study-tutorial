@@ -65,6 +65,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .authorizeRequests() //ServletRequest를 사용하는 요청에 대한 접근 제한 설정
                 .antMatchers(HttpMethod.POST, "/api/auth/**").permitAll() //검증 없이 이용가능(Post 요청 가능)
+                .antMatchers("/redis/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
 
