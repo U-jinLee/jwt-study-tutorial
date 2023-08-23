@@ -27,17 +27,24 @@ public class JwtTokenProvider implements InitializingBean {
     private static final String AUTHORITIES_KEY = "auth";
     private final String secretKey;
     private final long tokenValidityInMilliseconds;
+    private final long accessTokenValidityInMilliseconds;
+    private final long refreshTokenValidityInMilliseconds;
     private Key key;
 
     // 1. Bean 생성 후 주입 받은 후에
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
-                            @Value("${jwt.token-validity-in-seconds}") Long tokenValidityInSeconds) {
+                            @Value("${jwt.token-validity-in-seconds}") Long tokenValidityInSeconds,
+                            @Value("${jwt.live.access}") long accessLiveMillisecond,
+                            @Value("${jwt.live.refresh}") long refreshLiveMillisecond) {
         this.secretKey = secretKey;
         this.tokenValidityInMilliseconds = tokenValidityInSeconds;
+        this.accessTokenValidityInMilliseconds = accessLiveMillisecond;
+        this.refreshTokenValidityInMilliseconds = refreshLiveMillisecond;
     }
+
     // 2. secret 값을 Base64로 디코딩해 Key변수에 할당
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
@@ -107,15 +114,6 @@ public class JwtTokenProvider implements InitializingBean {
         return false;
     }
 
-//    public String createAccessToken(String email, List<String> roles) {
-//        return this.createToken(email, roles, accessTokenValidTime);
-//    }
-//
-//    public String createRefreshToken(String email, List<String> roles) {
-//        return this.createToken(email, roles, refreshTokenValidTime);
-//    }
-
-//
 //    // JWT 토큰에서 인증정보 조회
 //    public Authentication getAuthentication(String jwtToken) {
 //        UserDetails userDetails = customUserDetailService.loadUserByUsername(this.getUserEmail(jwtToken));
@@ -170,4 +168,27 @@ public class JwtTokenProvider implements InitializingBean {
 //    public List<String> getRoles(String email) {
 //        return userRepository.findByEmail(email).get().getAuthorities().stream().map(authority -> authority.getName()).collect(Collectors.toList());
 //    }
+
+    public String createAccessToken(Authentication authentication) {
+        return createToken(authentication, accessTokenValidityInMilliseconds);
+    }
+    public String createRefreshToken(Authentication authentication) {
+        return createToken(authentication, refreshTokenValidityInMilliseconds);
+    }
+    private String createToken(Authentication authentication, long tokenValidityInMilliseconds) {
+        //권한 값을 받아 하나의 문자열로 합침
+        String authorities = authentication.getAuthorities().stream()
+          .map(auth -> auth.getAuthority())
+          .collect(Collectors.joining(","));
+
+        long now = new Date().getTime();
+        Date validity = new Date(now + tokenValidityInMilliseconds);
+
+        return Jwts.builder()
+          .setSubject(authentication.getName()) // 페이로드 주제 정보
+          .claim(AUTHORITIES_KEY, authorities)
+          .signWith(key, SignatureAlgorithm.HS512)
+          .setExpiration(validity)
+          .compact();
+    }
 }
