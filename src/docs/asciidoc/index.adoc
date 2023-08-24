@@ -1,0 +1,25 @@
+ifndef::snippets[]
+:snippets: ./build/generated-snippets
+endif::[]
+
+= API 문서
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toc-title: JWT 튜토리얼 API 설명서
+:toclevels: 4
+
+= *인증*
+인증 리소스는 회원가입에 사용한다
+
+== **회원가입**
+POST 요청을 통해 회원가입을 할 수 있다.
+
+=== HTTP request
+include::{snippets}/sign-up/http-request.adoc[]
+include::{snippets}/sign-up/request-fields.adoc[]
+
+=== HTTP response
+include::{snippets}/sign-up/http-response.adoc[]
+include::{snippets}/sign-up/response-fields.adoc[]
