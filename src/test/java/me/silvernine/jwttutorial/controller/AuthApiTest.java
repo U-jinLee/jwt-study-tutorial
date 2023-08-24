@@ -84,6 +84,10 @@ class AuthApiTest extends BaseTest {
           .andExpect(header().exists("Authorization"))
           .andExpect(jsonPath("token").exists())
           .andDo(document("login",
+            requestFields(
+              fieldWithPath("username").description("Name of user"),
+              fieldWithPath("password").description("Password of user")
+            ),
             responseFields(
               fieldWithPath("token").description("JWT Token")
             )
